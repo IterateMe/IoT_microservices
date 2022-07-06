@@ -1,7 +1,9 @@
 const https = require('https');
-const mqtt = require("mqtt")
+const mqtt = require("mqtt");
+const { stringify } = require('querystring');
+
 var client = mqtt.connect('mqtt://broker.hivemq.com')
-const Mqtttopic= 'TestFrankMqtt123'
+const MqttTopic= 'TestFrankMqtt123'
 
 
 const options = {
@@ -12,13 +14,15 @@ const options = {
   };
   
   const req = https.request(options, res => {
-    console.log(statusCode= `${res.statusCode}`);
-    var str = "{"
+    
     res.on('data', d => {
-        if(d.byteLength != 1){
-         str+=d
-         client.publish(Mqtttopic,str)
-         console.log("Data Sent")
+        if(d.byteLength > 1){
+          var str = ""
+          str+=d
+          str = str.replace('\n',"")
+          
+          client.publish(MqttTopic,parseParticleEvent(str))
+          
         }
     });
   });
@@ -29,3 +33,15 @@ const options = {
   
   req.end();
 
+function parseParticleEvent(text){
+  if(text.includes("ok") || !text.includes("BadgeEvent"))
+    return ""
+  var positionData = text.search("data");
+  var positionttl = text.search("ttl");
+  var positionTime = text.search("published_at");
+  var postiionCoreId = text.search("coreid");
+  var data = text.substring(positionData+15,positionttl-3);
+  var time = Date(text.substring(positionTime+15,postiionCoreId-3))
+  console.log(data)
+  console.log(time)
+}
