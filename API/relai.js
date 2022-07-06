@@ -1,4 +1,8 @@
 const https = require('https');
+const mqtt = require("mqtt")
+var client = mqtt.connect('mqtt://broker.hivemq.com')
+const Mqtttopic= 'TestFrankMqtt123'
+
 
 const options = {
     hostname: 'api.particle.io',
@@ -9,11 +13,13 @@ const options = {
   
   const req = https.request(options, res => {
     console.log(statusCode= `${res.statusCode}`);
+    var str = "{"
     res.on('data', d => {
         if(d.byteLength != 1){
-                process.stdout.write(d);
+         str+=d
+         client.publish(Mqtttopic,str)
+         console.log("Data Sent")
         }
-            
     });
   });
   
@@ -22,3 +28,4 @@ const options = {
   });
   
   req.end();
+
