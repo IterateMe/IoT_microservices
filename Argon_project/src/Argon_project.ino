@@ -5,7 +5,6 @@
  * Date:
  */
 
-
 //#include "BadgeBeacon.h"
 #include "../lib/BeaconScanner/src/BeaconScanner.h"
 #include <map>
@@ -14,55 +13,62 @@ SYSTEM_THREAD(ENABLED);
 //SYSTEM_MODE(SEMI_AUTOMATIC);
 
 //Vector<String> inside;
-std::map<String, bool> players;
-std::map<String, bool>::iterator it; 
-
-void parseIBeacons(Vector<iBeaconScan>& iBeacons);
+std::map<String, String> players;   // mac - uuid
+std::map<String, bool> presence; // uuid - presence
+std::map<String, String>::iterator itPlayers; // iterator
+std::map<String, bool>::iterator itPresence; // iterator
 
 void onCallBack(Beacon& beacon, callback_type type){
-  Serial.println("Entering Callback");
-  parseIBeacons(Scanner.getiBeacons());
-  for(it = players.begin(); it != players.end(); it++){
-    const char* data = it->first;
-    Serial.printf("DATA: %s \n", data);
+  Serial.println("\n\nEntering Callback");
+  String addr = beacon.getAddress().toString();
+  bool inside = (type==NEW) ? true : false;
+  String jsonString;
+  for(iBeaconScan beacon: Scanner.getiBeacons()){
+    if(beacon.getAddress().toString() == addr){
+      String uuid = beacon.getUuid();
+      if(inside){
+        players[addr] = uuid;
+      }else{
+        players.erase(addr);
+      }
+      presence[uuid] = inside;
+      jsonString = "{\"uuid\":\"" + uuid + 
+        "\",\"inside\":\"" + inside + 
+        "\",\"time\":\"" + Time.timeStr().c_str() +
+        "\"}";
+      break;
+    }
+  }
+  Particle.publish(Particle.deviceID().c_str(), jsonString.c_str());
+  Serial.println("PUBLISHED");
+  for(itPresence = presence.begin(); itPresence != presence.end(); itPresence++){
+    String uuid = itPresence->first;
+    String pres =  itPresence->second ? "PRESENT":"ABSENT";
+    Serial.printf("%s is %s :: %s\n", uuid.c_str(), pres.c_str(), Time.timeStr().c_str());
   }
 }
 
 void setupBadge(){
   BLE.on();
   Scanner.setScanPeriod(5);
-  Scanner.setMissedCount(3);
+  Scanner.setMissedCount(1);
   Scanner.setCallback(onCallBack);
   Scanner.startContinuous(SCAN_IBEACON);
 }
 
-void parseIBeacons(Vector<iBeaconScan>& iBeacons){
-  for(iBeaconScan beacon: iBeacons){
-    String addr = beacon.getAddress().toString();
-    const char* uuid = beacon.getUuid();
-    //uint8_t rssi = beacon.getRssi();
-    players[addr] = true; 
-    //Serial.printf("Addr: %s :: uuid: %s :: MAP LENGTH: %d \n", addr.c_str(), uuid, (int) players.size());
-  }
-}
-
 void executeBadge(){
-  Serial.println("Loop");
-  int timeoutMs = 1000;
   Scanner.loop();
-  waitFor([](){return false;}, timeoutMs);
 }
-
-
 
 void setup() {
   Serial.begin(9600);
 	waitFor(Serial.isConnected, 30000);
   setupBadge();
+  waitFor(WiFi.ready, 30000);
+  Particle.connect();
   Serial.println("Start scanning");
 }
 
 void loop() {
-  
   executeBadge();
 }
