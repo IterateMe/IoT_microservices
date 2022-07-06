@@ -3,9 +3,11 @@
  * Description: APP5_S6
  * Author:galv2801 - marf2910
  * Date:
+ * 
+ * License:
+ * Si tu copie, on perd tes vaches!
  */
 
-//#include "BadgeBeacon.h"
 #include "../lib/BeaconScanner/src/BeaconScanner.h"
 #include <map>
 
@@ -41,7 +43,7 @@ void onCallBack(Beacon& beacon, callback_type type){
       break;
     }
   }
-  Particle.publish(Particle.deviceID().c_str(), jsonString.c_str());
+  Particle.publish("BadgeEvent", jsonString.c_str());
   Serial.println("PUBLISHED");
   for(itPresence = presence.begin(); itPresence != presence.end(); itPresence++){
     String uuid = itPresence->first;
