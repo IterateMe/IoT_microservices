@@ -12,11 +12,13 @@
 SYSTEM_THREAD(ENABLED);
 //SYSTEM_MODE(SEMI_AUTOMATIC);
 
-//Vector<String> inside;
+int led = D7;
 std::map<String, String> players;   // mac - uuid
 std::map<String, bool> presence; // uuid - presence
 std::map<String, String>::iterator itPlayers; // iterator
 std::map<String, bool>::iterator itPresence; // iterator
+bool ledIsON = 0;
+
 
 void onCallBack(Beacon& beacon, callback_type type){
   Serial.println("\n\nEntering Callback");
@@ -48,6 +50,12 @@ void onCallBack(Beacon& beacon, callback_type type){
   }
 }
 
+int switchLED(String arg){
+  ledIsON = !ledIsON;
+  digitalWrite(led, ledIsON);
+  return 0;
+}
+
 void setupBadge(){
   BLE.on();
   Scanner.setScanPeriod(5);
@@ -61,11 +69,14 @@ void executeBadge(){
 }
 
 void setup() {
+  pinMode(led, OUTPUT);
+  digitalWrite(led, 0);
   Serial.begin(9600);
 	waitFor(Serial.isConnected, 30000);
   setupBadge();
-  waitFor(WiFi.ready, 30000);
   Particle.connect();
+  Particle.function("switchLed", switchLED);
+  Particle.variable("LedStatus", ledIsON);
   Serial.println("Start scanning");
 }
 
