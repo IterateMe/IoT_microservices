@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "devStart": " nodemon API/services.js"
+    "devStartAPI": " nodemon API/services.js",
+    "devStartRelay": " nodemon API/relai.js",
+    "dev": "node app.js",
+    "debug": "nodemon --inspect app.js"
   },
   "repository": {
     "type": "git",
