@@ -42,6 +42,5 @@ function parseParticleEvent(text){
   var postiionCoreId = text.search("coreid");
   var data = text.substring(positionData+15,positionttl-3);
   var time = Date(text.substring(positionTime+15,postiionCoreId-3))
-  console.log(data)
-  console.log(time)
+  return`${time} : ${data}\n`
 }

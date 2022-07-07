@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState,useEffect  } from 'react';
 
 var list = [
   {id:1,text:"MiAmor"},
@@ -11,54 +11,39 @@ var list = [
 ]
 
 function buttonOnClick(){
-  
-  console.log("Boutton Click")
   fetch('http://localhost:4000/changeLED')
-  //Implement LED change 
+  .then(response=>console.log(response.json())) 
 }
 
 async function getAllEvents(){
-  //Call the Archive to get all the events then parse then with the format data
+  //Call the Archive to get all the events, wait for the json processing to finish
   const response =  await fetch('http://localhost:4000/getEvent')
   return response.json()
    
 }
 
-function formatData(listOfEvents){
-  var rows= []
-  for (var i = 0; i < listOfEvents.length; i++) {
-    rows.push({id:`${i}`,text:`${listOfEvents[i].text}`});
-    //Probably need to adjust the attribute of listOfEvents to get
-  }
-  return rows  
-}
-
-
 
 function App() {
-  const [ble_events,setBle_events]= useState("BasicState")
+  const [ble_events,setBle_events]= useState("Press the updateButton for events")
   
+  //Triggered when the page is loaded
+  useEffect(() => {
+    updateButtonClick()
+    return () => {};
+  },);
+
   async function  updateButtonClick(){
     var data = await getAllEvents()
     setBle_events(data.events)
   }
 
-
-
   return (
-    <div className="App" style={{
-      //backgroundImage: `url(${process.env.PUBLIC_URL + '/meme.jpg'})`,
-      //backgroundRepeat: 'no-repeat'
-      }}>
-      
+    <div className="App">
       <button  onClick={buttonOnClick}> Change Led Status</button>
       <button  onClick={updateButtonClick}> updateButton</button>
-      <p>{ble_events}</p>
-      {/* <ul className="EventList">
-        {formatData(list).map(item=>(
-          <li key={item.id}>{item.text}</li>
-        ))}
-      </ul> */}
+      <br></br>
+      <span className='EventList'> 
+        {ble_events}</span>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  text-align: left;
 }
 
 .App-logo {
@@ -38,8 +38,10 @@
 }
 
 
+
 .EventList {
   flex: auto;
   text-align: left;
-  color: white;
+  color: black;
+  white-space: pre-line;
 }

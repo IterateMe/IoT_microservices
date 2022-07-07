@@ -19,15 +19,16 @@ const deviceID = "e00fce688a411bd95df605f8"
 /*
 ARCHIVE CODE
 */
-//Subscriber (Archive)
+
+//Subscribe de la queue
 client.on("connect",function(){
     client.subscribe('TestFrankMqtt123')
     console.log("Connected successfully")
 })
 
+//Listener de la queue
 client.on('message',function(topic,message){
     console.log("Data received from  MQTT queue")
-    
     fs.appendFile('./API/Db.txt', message.toString(),  err => {
         if(err){
             console.log(err)
@@ -53,48 +54,26 @@ app.get("/getEvent",(request,response)=>{
     
 })
 
-//Control API fonction
+
+/*
+CONTROL CODE
+*/
 app.get("/changeLED",(request,response)=>{  
-console.log("CHANGE LED CALLED")  
+    var url = `https://api.spark.io/v1/devices/${deviceID}/switchLed`;
 
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
 
-var url = "https://api.spark.io/v1/devices/e00fce688a411bd95df605f8/switchLed";
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-var xhr = new XMLHttpRequest();
-xhr.open("POST", url);
+    xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+        console.log(xhr.status);
+        console.log(xhr.responseText);
+    }};
 
-xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    var data = `access_token=${token}`;
 
-xhr.onreadystatechange = function () {
-   if (xhr.readyState === 4) {
-      console.log(xhr.status);
-      console.log(xhr.responseText);
-   }};
-
-var data = "access_token=5c86d7f0e33b96e16d92fd552d1eb3f114322a6c";
-
-xhr.send(data);
-
-
-// const options = {
-//         hostname: 'api.spark.io',
-//         port: 443,
-//         path: `/v1/devices/${deviceID}/switchLed`,
-//         method: 'POST',
-//     };
-
-//     const req = https.request(options, res => {
-
-//     res.on('data', d => { 
-//         console.log("Response" + d.toString())});
-//     });
-
-//     req.on('error', error => {
-//         console.error(error);
-//     });
-
-//     req.write(JSON.stringify({access_token:token}))
-//     req.end();
-// })
+    xhr.send(data);
 })
 app.listen(4000)
