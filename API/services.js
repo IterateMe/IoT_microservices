@@ -67,8 +67,6 @@ app.get("/changeLED",(request,response)=>{
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
     xhr.onreadystatechange = function () {
-    response.status(xhr.status)
-    response.json(xhr.responseText)
         if (xhr.readyState === 4) {
         console.log(xhr.status);
         console.log(xhr.responseText);
